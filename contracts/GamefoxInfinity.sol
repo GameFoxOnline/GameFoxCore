@@ -274,10 +274,10 @@ contract GamefoxInfinity is Pausable, ReentrancyGuard {
 
         uint256 amount = user.rewards;
         if (amount > 0) {
-            user.shares--;
+            // user.shares--;
             user.rewards = 0;
 
-            totalShares--;
+            // totalShares--;
 
             uint256 fee = calculateFee(account, amount);
             Address.sendValue(gamefoxToken, fee);
@@ -304,12 +304,13 @@ contract GamefoxInfinity is Pausable, ReentrancyGuard {
         }
     }
 
-    function purchase(uint256 amount, address parent) external payable whenNotPaused nonReentrant {
+    function purchase(uint256 amount, address parent) external payable whenNotPaused nonReentrant updateReward(_msgSender()) {
         require(msg.value >= amount && amount % minParchaseAmount == 0, "Invalid purchase amount");
 
         _addRewardAmount(amount / 2);
 
         address account = _msgSender();
+
         User storage user = users[account];
         user.amount += amount;
 
@@ -317,8 +318,6 @@ contract GamefoxInfinity is Pausable, ReentrancyGuard {
         user.shares += shares;
 
         totalShares += shares;
-
-        user.rewardPerSharePaid = rewardPerShareStored;
 
         if (user.parent == address(0) && parent != address(0) && parent != account && users[parent].parent != account) {
             user.parent = parent;
@@ -344,7 +343,7 @@ contract GamefoxInfinity is Pausable, ReentrancyGuard {
         emit Purchased(account, parent, amount);
     }
 
-    function _addRewardAmount(uint256 amount) internal updateReward(address(0)) {
+    function _addRewardAmount(uint256 amount) internal {
         if (block.timestamp >= periodFinish) {
             rewardRate = amount / rewardDuration;
         } else {
