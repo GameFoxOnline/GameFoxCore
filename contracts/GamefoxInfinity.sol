@@ -274,10 +274,10 @@ contract GamefoxInfinity is Pausable, ReentrancyGuard {
 
         uint256 amount = user.rewards;
         if (amount > 0) {
-            // user.shares--;
+            user.shares--;
             user.rewards = 0;
 
-            // totalShares--;
+            totalShares--;
 
             uint256 fee = calculateFee(account, amount);
             Address.sendValue(gamefoxToken, fee);
